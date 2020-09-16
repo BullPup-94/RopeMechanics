@@ -5,13 +5,15 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     public Camera rayCam;
+    [Range(0.1f, 2f)]
+    public float movementThresholdDistance = 0.5f;
+    public float speed = 10;
 
     private Rigidbody rb;
     private Vector2 movement;
-    public float speed = 10;
-
-    public bool mouseDown;
-
+    private bool mouseDown;
+    private bool canMove;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -39,9 +41,14 @@ public class Movement : MonoBehaviour
             {
                 Vector2 hitPosition = hit.point.ToXZ();
                 Vector2 curr = transform.position.ToXZ();
-                if (Vector2.Distance(hitPosition, curr) > 0.5f)
+                if (Vector2.Distance(hitPosition, curr) > movementThresholdDistance)
                 {
+                    canMove = true;
                     movement = curr.DirectionTo(hitPosition);
+                }
+                else
+                {
+                    canMove = false;
                 }
             }
         }
@@ -57,6 +64,13 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.AddForce(speed * movement.ToXYZ(),ForceMode.Acceleration);
+        if (canMove)
+        {
+            rb.AddForce(speed * movement.ToXYZ(), ForceMode.Acceleration);
+        }
+        else
+        {
+            rb.velocity = rb.velocity.With(x: 0, z: 0);
+        }
     }
 }
