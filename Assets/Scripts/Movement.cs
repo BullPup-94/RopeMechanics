@@ -13,7 +13,15 @@ public class Movement : MonoBehaviour
     private Vector2 movement;
     private bool mouseDown;
     private bool canMove;
-    
+
+    public Transform TargetObject;
+
+    public Transform PlayerCharacter;
+
+    public Transform RopeHolder;
+    public Transform TempRopeHolder;
+    Vector3 RopeHolderPos;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,23 +31,27 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        RopeHolder.GetComponent<Rigidbody>().MovePosition(TempRopeHolder.position);
         if(Input.GetMouseButtonDown(0))
         {
             mouseDown = true;
+            PlayerCharacter.GetComponent<Animation>().CrossFade("Run");
         }
 
         if(Input.GetMouseButtonUp(0))
         {
             mouseDown = false;
+            PlayerCharacter.GetComponent<Animation>().CrossFade("Idle");
         }
 
 
-        if(mouseDown)
+        if (mouseDown)
         {
             Ray mouseRay = rayCam.ScreenPointToRay(Input.mousePosition);
             if(Physics.Raycast(mouseRay,out RaycastHit hit))
             {
-                Vector2 hitPosition = hit.point.ToXZ();
+//                Vector2 hitPosition = hit.point.ToXZ();
+                Vector2 hitPosition = TargetObject.position.ToXZ();
                 Vector2 curr = transform.position.ToXZ();
                 if (Vector2.Distance(hitPosition, curr) > movementThresholdDistance)
                 {
@@ -67,6 +79,8 @@ public class Movement : MonoBehaviour
         if (canMove)
         {
             rb.AddForce(speed * movement.ToXYZ(), ForceMode.Acceleration);
+            Vector3 TargetPos = new Vector3(TargetObject.position.x, transform.position.y, TargetObject.position.z);
+            transform.LookAt(TargetPos);
         }
         else
         {
